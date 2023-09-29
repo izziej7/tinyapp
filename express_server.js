@@ -100,6 +100,14 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// ROUTES FOR /LOGOUT
+// clear cookie for username
+// redirect to /urls
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 // listen on port 8080
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
