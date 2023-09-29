@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -7,6 +8,9 @@ app.set("view engine", "ejs");
 
 // set up body parser
 app.use(express.urlencoded({ extended: true }));
+
+// set up cookie parser
+app.use(cookieParser());
 
 // generate a random short URL id
 function generateRandomString() {
@@ -26,8 +30,12 @@ const urlDatabase = {
 
 // ROUTES FOR /URLS
 // display all the URLs in the database
+// display the username if logged in
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -42,14 +50,21 @@ app.post("/urls", (req, res) => {
 
 // ROUTES FOR /URLS/NEW
 // display the form to create a new short URL
+// display the username if logged in
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 // ROUTES FOR /URLS/:ID
 // display the specified short URL id and corresponding long URL
+// display the username if logged in
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    username: req.cookies["username"],
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id]
+  };
   res.render("urls_show", templateVars);
 });
 
