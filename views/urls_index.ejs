@@ -17,9 +17,12 @@
     <title>TinyApp</title>
   </head>
   <body>
+    <!--add header-->
     <%- include('partials/_header') %>
+
     <main style="margin: 1em;">
       <h3>My URLs</h3>
+      <!--set up table to display all long URLs and corresponding short URLs-->
       <table class="table">
         <thead>
           <tr>
@@ -30,15 +33,23 @@
           </tr>
         </thead>
         <tbody>
+          <!--loop through short URL ids-->
           <% for (const id of Object.keys(urls)) { %>
             <tr>
+              <!--display short URL id-->
               <td><%= id %></td>
+              <!--display long URL-->
               <td><%= urls[id] %></td>
+              <!--edit button navigates to /urls/:id-->
+              <!--/urls/:id has an edit form-->
               <td>
                 <form method="GET" action="/urls/<%= id %>">
                   <button type="submit" class="btn btn-outline-primary">Edit</button>
                 </form>
               </td>
+              <!--delete button posts to /urls/:id/delete-->
+              <!--deletes short url record from database-->
+              <!--redirects to /urls-->
               <td>
                 <form method="POST" action="/urls/<%= id %>/delete">
                   <button type="submit" class="btn btn-outline-danger">Delete</button>

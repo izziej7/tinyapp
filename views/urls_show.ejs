@@ -12,18 +12,24 @@
   </head>
 
   <body>
+    <!--add header-->
     <%- include('partials/_header') %>
+
     <div class="card text-center">
       <div class="card-header"></div>
+      <!--display specified short URL id and corresponding long URL-->
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <!--set up short URL id to navigate to the short URL-->
+        <!--the short URL redirects to the long URL-->
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
       </div>
+      <!--set up form to post the edited long URL to /urls/:id-->
       <div class="card-footer text-muted">
         <h2>Edit</h2>
-        <form class="form-inline" action="/urls/<%= id %>" method="POST">
+        <form class="form-inline" method="POST" action="/urls/<%= id %>">
           <div class="form-group mb-2 mx-auto">
             <label for="longURL">New URL:</label>
             <input
