@@ -76,6 +76,15 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+// ROUTES FOR /LOGIN
+// receive input from form in _header.ejs
+// set cookie for username
+// redirect to /urls
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
 // listen on port 8080
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
