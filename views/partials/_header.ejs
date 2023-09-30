@@ -18,32 +18,32 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <!--if a username exists-->
         <% if (username) { %>
-        <!--set up form to display the username and post to /logout-->
+          <!--set up form to display the username and post to /logout-->
           <div class="nav-item" style="margin-left: auto;">
-          <form class="form-inline" method="POST" action="/logout">
-            <div class="form-group">
-              <label style="margin-right: 1em;">Logged in as: <%= username %></label>
-              <button type="submit" class="btn btn-outline-dark">Logout</button>
-            </div>
-          </form>
-        </div>
+            <form class="form-inline" method="POST" action="/logout">
+              <div class="form-group">
+                <label style="margin-right: 1em;">Logged in as: <%= username %></label>
+                <button type="submit" class="btn btn-outline-dark">Logout</button>
+              </div>
+            </form>
+          </div>
         <!--if a username does not exist-->
         <% } else { %>
-        <!--set up form to post the username to /login-->
-        <div class="nav-item" style="margin-left: auto;">
-          <form class="form-inline" method="POST" action="/login">
-            <div class="form-group">
-              <input
-                class="form-control"
-                type="text"
-                name="username"
-                placeholder="Username"
-                style="width: 300px; margin: 0.25em"
-              />
-              <button type="submit" class="btn btn-outline-dark">Login</button>
-            </div>
-          </form>
-        </div>
+          <!--set up form to post the username to /login-->
+          <div class="nav-item" style="margin-left: auto;">
+            <form class="form-inline" method="POST" action="/login">
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  style="width: 300px; margin: 0.25em"
+                />
+                <button type="submit" class="btn btn-outline-dark">Login</button>
+              </div>
+            </form>
+          </div>
         <% } %>  
       </div>
     </div>
