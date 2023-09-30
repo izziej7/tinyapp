@@ -34,7 +34,7 @@
         </thead>
         <tbody>
           <!--loop through short URL ids-->
-          <% for (const id of Object.keys(urls)) { %>
+          <% for (const id in urls) { %>
             <tr>
               <!--display short URL id-->
               <td><%= id %></td>
