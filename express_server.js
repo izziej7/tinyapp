@@ -12,21 +12,24 @@ app.use(express.urlencoded({ extended: true }));
 // set up cookie parser
 app.use(cookieParser());
 
-// generate a random short URL id
-function generateRandomString() {
-  let randomString = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return randomString;
-}
-
 // set up database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+// FUNCTIONS
+// generate a random short URL id
+function generateRandomString() {
+  let randomString = '';
+
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < 6; i++) {
+    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+
+  return randomString;
+}
 
 // ROUTES FOR /URLS
 // display all the URLs in the database
@@ -57,9 +60,15 @@ app.get("/urls/new", (req, res) => {
 });
 
 // ROUTES FOR /URLS/:ID
+// handle errors if id does not exist
 // display the specified short URL id and corresponding long URL
 // display the username if logged in
 app.get("/urls/:id", (req, res) => {
+  const idExists = urlDatabase.hasOwnProperty(req.params.id);
+  if (!idExists) {
+    return res.status(404).send("ID not found.");
+  }
+  
   const templateVars = {
     username: req.cookies["username"],
     id: req.params.id,
