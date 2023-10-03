@@ -117,6 +117,15 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+// ROUTES FOR /REGISTER
+// display the form to register a new user
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("register", templateVars);
+});
+
 // listen on port 8080
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
