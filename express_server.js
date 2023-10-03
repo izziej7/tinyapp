@@ -12,14 +12,29 @@ app.use(express.urlencoded({ extended: true }));
 // set up cookie parser
 app.use(cookieParser());
 
-// set up database
+// DATABASE
+// set up url object
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com",
+};
+
+// set up user object
+const users = {
+  "c3yWo3": {
+    id: "c3yWo3",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  "1tn6yL": {
+    id: "1tn6yL",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
 };
 
 // FUNCTIONS
-// generate a random short URL id
+// generate a random short URL id or user id
 function generateRandomString() {
   let randomString = '';
 
@@ -31,19 +46,30 @@ function generateRandomString() {
   return randomString;
 }
 
+// return the user based on the specified id
+function getUser(userId) {
+  for (const uid in users) {
+    if (users[uid].id === userId) {
+      return users[uid];
+    }
+  }
+}
+
 // ROUTES FOR /URLS
-// display all the URLs in the database
+// display all the URLs in the urls database
 // display the username if logged in
 app.get("/urls", (req, res) => {
+  const user = getUser(req.cookies["user_id"]);
+
   const templateVars = {
-    username: req.cookies["username"],
-    urls: urlDatabase
+    user,
+    urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
 });
 
 // receive input from form in urls_new.ejs
-// generate a short URL id and create a record in the database
+// generate a short URL id and create a record in the urls database
 // redirect to /urls/:id
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
@@ -55,7 +81,10 @@ app.post("/urls", (req, res) => {
 // display the form to create a new short URL
 // display the username if logged in
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const user = getUser(req.cookies["user_id"]);
+  const templateVars = {
+    user,
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -68,17 +97,18 @@ app.get("/urls/:id", (req, res) => {
   if (!idExists) {
     return res.status(404).send("ID not found.");
   }
-  
+
+  const user = getUser(req.cookies["user_id"]);
   const templateVars = {
-    username: req.cookies["username"],
+    user,
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
   };
   res.render("urls_show", templateVars);
 });
 
 // receive input from form in urls_show.ejs
-// edit the long URL in the specified record in the database
+// edit the long URL in the specified record in the urls database
 // redirect to /urls
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
@@ -86,7 +116,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // ROUTES FOR /URLS/:ID/DELETE
-// delete the specified record from the database
+// delete the specified record from the urls database
 // redirect to /urls
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
@@ -113,17 +143,33 @@ app.post("/login", (req, res) => {
 // clear cookie for username
 // redirect to /urls
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
 // ROUTES FOR /REGISTER
 // display the form to register a new user
 app.get("/register", (req, res) => {
+  const user = getUser(req.cookies["user_id"]);
   const templateVars = {
-    username: req.cookies["username"]
+    user,
   };
   res.render("register", templateVars);
+});
+
+// receive input from form in register.ejs
+// generate a user id and create a record in the users database
+// set cookie for user_id
+// redirect to /urls
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  users[id] = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password,
+  };
+  res.cookie("user_id", id);
+  res.redirect("/urls");
 });
 
 // listen on port 8080
