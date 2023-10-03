@@ -178,7 +178,7 @@ app.post("/login", (req, res) => {
 // redirect to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 // ROUTES FOR /REGISTER
