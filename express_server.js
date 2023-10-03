@@ -70,7 +70,6 @@ function getUserByEmail(email) {
 // display the email if logged in
 app.get("/urls", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
-
   const templateVars = {
     user,
     urls: urlDatabase,
@@ -141,6 +140,16 @@ app.get("/u/:id", (req, res) => {
 });
 
 // ROUTES FOR /LOGIN
+// display the form to login a user
+// display the email if logged in
+app.get("/login", (req, res) => {
+  const user = getUserById(req.cookies["user_id"]);
+  const templateVars = {
+    user,
+  };
+  res.render("login", templateVars);
+});
+
 // receive input from form in _header.ejs
 // set cookie for username
 // redirect to /urls
