@@ -13,37 +13,23 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav" style="align-items: center; flex: 1; justify-content: space-between;">
+      <div class="navbar-nav w-100">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <!--if a username exists-->
-        <% if (username) { %>
+        <% if (user) { %>
           <!--set up form to display the username and post to /logout-->
-          <div class="nav-item" style="margin-left: auto;">
-            <form class="form-inline" method="POST" action="/logout">
-              <div class="form-group">
-                <label style="margin-right: 1em;">Logged in as: <%= username %></label>
-                <button type="submit" class="btn btn-outline-dark">Logout</button>
-              </div>
-            </form>
-          </div>
+          <form class="form-inline ml-auto" method="POST" action="/logout">
+            <div class="form-group">
+              <label style="margin-right: 1em;">Logged in as: <%= user.email %></label>
+              <button type="submit" class="btn btn-outline-dark">Logout</button>
+            </div>
+          </form>
         <!--if a username does not exist-->
         <% } else { %>
           <!--set up form to post the username to /login-->
-          <div class="nav-item" style="margin-left: auto;">
-            <form class="form-inline" method="POST" action="/login">
-              <div class="form-group">
-                <input
-                  class="form-control"
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  style="width: 300px; margin: 0.25em"
-                />
-                <button type="submit" class="btn btn-outline-dark">Login</button>
-              </div>
-            </form>
-          </div>
+          <a class="nav-item btn btn-primary ml-auto" href="/register">Register</a>
+          <a class="nav-item btn btn-primary ml-2" href="/login">Login</a>
         <% } %>  
       </div>
     </div>
