@@ -103,6 +103,7 @@ app.get("/urls/new", (req, res) => {
 // display the email if logged in
 app.get("/urls/:id", (req, res) => {
   const idExists = urlDatabase.hasOwnProperty(req.params.id);
+  
   if (!idExists) {
     return res.status(404).send("ID not found.");
   }
@@ -150,11 +151,25 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-// receive input from form in _header.ejs
-// set cookie for username
+// receive input from form in login.ejs
+// handle errors if email and/or password are invalid
+// set cookie for user_id
 // redirect to /urls
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!getUserByEmail(email)) {
+    return res.status(403).send("Invalid email.");
+  }
+
+  const validUser = getUserByEmail(email);
+
+  if (validUser.password !== password) {
+    return res.status(403).send("Invalid password.");
+  }
+
+  res.cookie("user_id", validUser.id);
   res.redirect("/urls");
 });
 
@@ -185,6 +200,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
   if (!email || !password) {
     return res.status(400).send("Email and/or password not provided.");
   }
