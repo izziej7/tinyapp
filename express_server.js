@@ -57,7 +57,7 @@ function getUser(userId) {
 
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
-// display the username if logged in
+// display the email if logged in
 app.get("/urls", (req, res) => {
   const user = getUser(req.cookies["user_id"]);
 
@@ -79,7 +79,7 @@ app.post("/urls", (req, res) => {
 
 // ROUTES FOR /URLS/NEW
 // display the form to create a new short URL
-// display the username if logged in
+// display the email if logged in
 app.get("/urls/new", (req, res) => {
   const user = getUser(req.cookies["user_id"]);
   const templateVars = {
@@ -91,7 +91,7 @@ app.get("/urls/new", (req, res) => {
 // ROUTES FOR /URLS/:ID
 // handle errors if id does not exist
 // display the specified short URL id and corresponding long URL
-// display the username if logged in
+// display the email if logged in
 app.get("/urls/:id", (req, res) => {
   const idExists = urlDatabase.hasOwnProperty(req.params.id);
   if (!idExists) {
@@ -140,7 +140,7 @@ app.post("/login", (req, res) => {
 });
 
 // ROUTES FOR /LOGOUT
-// clear cookie for username
+// clear cookie for user_id
 // redirect to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
@@ -149,6 +149,7 @@ app.post("/logout", (req, res) => {
 
 // ROUTES FOR /REGISTER
 // display the form to register a new user
+// display the email if logged in
 app.get("/register", (req, res) => {
   const user = getUser(req.cookies["user_id"]);
   const templateVars = {
