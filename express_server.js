@@ -23,13 +23,13 @@ const urlDatabase = {
 const users = {
   "c3yWo3": {
     id: "c3yWo3",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    email: "a@a.com",
+    password: "123",
   },
   "1tn6yL": {
     id: "1tn6yL",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
+    email: "b@b.com",
+    password: "456",
   },
 };
 
@@ -47,7 +47,7 @@ function generateRandomString() {
 }
 
 // return the user based on the specified id
-function getUser(userId) {
+function getUserById(userId) {
   for (const uid in users) {
     if (users[uid].id === userId) {
       return users[uid];
@@ -55,11 +55,21 @@ function getUser(userId) {
   }
 }
 
+// return the user if found or null if not based on the specified email
+function getUserByEmail(email) {
+  for (const uid in users) {
+    if (users[uid].email === email) {
+      return users[uid];
+    }
+  }
+  return null;
+}
+
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
 // display the email if logged in
 app.get("/urls", (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUserById(req.cookies["user_id"]);
 
   const templateVars = {
     user,
@@ -81,7 +91,7 @@ app.post("/urls", (req, res) => {
 // display the form to create a new short URL
 // display the email if logged in
 app.get("/urls/new", (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUserById(req.cookies["user_id"]);
   const templateVars = {
     user,
   };
@@ -98,7 +108,7 @@ app.get("/urls/:id", (req, res) => {
     return res.status(404).send("ID not found.");
   }
 
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUserById(req.cookies["user_id"]);
   const templateVars = {
     user,
     id: req.params.id,
@@ -151,7 +161,7 @@ app.post("/logout", (req, res) => {
 // display the form to register a new user
 // display the email if logged in
 app.get("/register", (req, res) => {
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUserById(req.cookies["user_id"]);
   const templateVars = {
     user,
   };
@@ -159,15 +169,26 @@ app.get("/register", (req, res) => {
 });
 
 // receive input from form in register.ejs
+// handle errors if email and/or password are invalid
 // generate a user id and create a record in the users database
 // set cookie for user_id
 // redirect to /urls
 app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    return res.status(400).send("Email and/or password not provided.");
+  }
+
+  if (getUserByEmail(email)) {
+    return res.status(400).send("Email already registered.")
+  }
+
   const id = generateRandomString();
   users[id] = {
-    id: id,
-    email: req.body.email,
-    password: req.body.password,
+    id,
+    email,
+    password,
   };
   res.cookie("user_id", id);
   res.redirect("/urls");
