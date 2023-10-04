@@ -15,8 +15,14 @@ app.use(cookieParser());
 // DATABASE
 // set up url object
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "c3yWo3",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "1tn6yL",
+  },
 };
 
 // set up user object
@@ -81,8 +87,15 @@ app.get("/urls", (req, res) => {
 // generate a short URL id and create a record in the urls database
 // redirect to /urls/:id
 app.post("/urls", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.status(401).send("You must be logged in to shorten URLs.");
+  }
+
   const id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"],
+  };
   res.redirect(`/urls/${id}`);
 });
 
@@ -91,6 +104,11 @@ app.post("/urls", (req, res) => {
 // display the email if logged in
 app.get("/urls/new", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
+
+  if (!user) {
+    return res.redirect("/login");
+  }
+
   const templateVars = {
     user,
   };
@@ -103,7 +121,7 @@ app.get("/urls/new", (req, res) => {
 // display the email if logged in
 app.get("/urls/:id", (req, res) => {
   const idExists = urlDatabase.hasOwnProperty(req.params.id);
-  
+
   if (!idExists) {
     return res.status(404).send("ID not found.");
   }
@@ -112,7 +130,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user,
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
   };
   res.render("urls_show", templateVars);
 });
@@ -121,7 +139,7 @@ app.get("/urls/:id", (req, res) => {
 // edit the long URL in the specified record in the urls database
 // redirect to /urls
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -136,7 +154,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // ROUTES FOR /U/:ID
 // redirect to the long URL
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
@@ -145,7 +163,7 @@ app.get("/u/:id", (req, res) => {
 // display the email if logged in
 app.get("/login", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
-  
+
   if (user) {
     return res.redirect("/urls");
   }
@@ -191,11 +209,11 @@ app.post("/logout", (req, res) => {
 // display the email if logged in
 app.get("/register", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
-  
+
   if (user) {
     return res.redirect("/urls");
   }
-  
+
   const templateVars = {
     user,
   };
@@ -216,7 +234,7 @@ app.post("/register", (req, res) => {
   }
 
   if (getUserByEmail(email)) {
-    return res.status(400).send("Email already registered.")
+    return res.status(400).send("Email already registered.");
   }
 
   const id = generateRandomString();
