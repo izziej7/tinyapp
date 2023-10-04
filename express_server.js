@@ -71,14 +71,32 @@ function getUserByEmail(email) {
   return null;
 }
 
+// return the URLs associated with the specified userID as an object
+function urlsForUser(id) {
+  const urlDatabaseById = {};
+  
+  for (const uid in urlDatabase) {
+    if (urlDatabase[uid].userID === id) {
+      urlDatabaseById[uid] = urlDatabase[uid];
+    }
+  }
+
+  return urlDatabaseById;
+}
+
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
 // display the email if logged in
 app.get("/urls", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
+  
+  if (!user) {
+    return res.status(401).send("Log in or register to see your URLs.")
+  }
+
   const templateVars = {
     user,
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
   };
   res.render("urls_index", templateVars);
 });
@@ -121,12 +139,21 @@ app.get("/urls/new", (req, res) => {
 // display the email if logged in
 app.get("/urls/:id", (req, res) => {
   const idExists = urlDatabase.hasOwnProperty(req.params.id);
-
   if (!idExists) {
     return res.status(404).send("ID not found.");
   }
-
+  
   const user = getUserById(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(401).send("Log in or register to see your URLs.")
+  }
+  
+  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
+  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
+  if (!idBelongsToUser) {
+    return res.status(403).send("You do not own this URL.");
+  }
+
   const templateVars = {
     user,
     id: req.params.id,
