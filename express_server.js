@@ -145,6 +145,11 @@ app.get("/u/:id", (req, res) => {
 // display the email if logged in
 app.get("/login", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
+  
+  if (user) {
+    return res.redirect("/urls");
+  }
+
   const templateVars = {
     user,
   };
@@ -186,6 +191,11 @@ app.post("/logout", (req, res) => {
 // display the email if logged in
 app.get("/register", (req, res) => {
   const user = getUserById(req.cookies["user_id"]);
+  
+  if (user) {
+    return res.redirect("/urls");
+  }
+  
   const templateVars = {
     user,
   };
