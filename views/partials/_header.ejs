@@ -17,11 +17,11 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <!--if a user exists-->
-        <% if (user) { %>
+        <% if (userId) { %>
           <!--set up form to display the email and post to /logout-->
           <form class="form-inline ml-auto" method="POST" action="/logout">
             <div class="form-group">
-              <label style="margin-right: 1em;">Logged in as: <%= user.email %></label>
+              <label style="margin-right: 1em;">Logged in as: <%= users[userId].email %></label>
               <button type="submit" class="btn btn-outline-dark">Logout</button>
             </div>
           </form>

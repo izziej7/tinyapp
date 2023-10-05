@@ -52,32 +52,23 @@ function generateRandomString() {
   return randomString;
 }
 
-// return the user based on the specified id
-function getUserById(userId) {
-  for (const uid in users) {
-    if (users[uid].id === userId) {
-      return users[uid];
-    }
-  }
-}
-
 // return the user if found or null if not based on the specified email
 function getUserByEmail(email) {
-  for (const uid in users) {
-    if (users[uid].email === email) {
-      return users[uid];
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
     }
   }
   return null;
 }
 
 // return the URLs associated with the specified userID as an object
-function urlsForUser(id) {
+function urlsForUser(userId) {
   const urlDatabaseById = {};
   
-  for (const uid in urlDatabase) {
-    if (urlDatabase[uid].userID === id) {
-      urlDatabaseById[uid] = urlDatabase[uid];
+  for (const urlId in urlDatabase) {
+    if (urlDatabase[urlId].userID === userId) {
+      urlDatabaseById[urlId] = urlDatabase[urlId];
     }
   }
 
@@ -86,171 +77,172 @@ function urlsForUser(id) {
 
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
-// display the email if logged in
 app.get("/urls", (req, res) => {
-  const user = getUserById(req.cookies["user_id"]);
+  const userId = req.cookies["user_id"];
   
-  if (!user) {
-    return res.status(401).send("Log in or register to see your URLs.")
+  if (!userId) {
+    return res.status(401).send("Please log in.")
   }
 
   const templateVars = {
-    user,
-    urls: urlsForUser(req.cookies["user_id"]),
+    userId,
+    users,
+    urls: urlsForUser(userId),
   };
-  res.render("urls_index", templateVars);
+
+  return res.render("urls_index", templateVars);
 });
 
 // receive input from form in urls_new.ejs
 // generate a short URL id and create a record in the urls database
 // redirect to /urls/:id
 app.post("/urls", (req, res) => {
-  if (!req.cookies["user_id"]) {
-    return res.status(401).send("You must be logged in to shorten URLs.");
+  const userId = req.cookies["user_id"];
+  
+  if (!userId) {
+    return res.status(401).send("Please log in.");
   }
 
-  const id = generateRandomString();
-  urlDatabase[id] = {
+  const urlId = generateRandomString();
+
+  urlDatabase[urlId] = {
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"],
+    userID: userId,
   };
-  res.redirect(`/urls/${id}`);
+
+  return res.redirect(`/urls/${urlId}`);
 });
 
 // ROUTES FOR /URLS/NEW
 // display the form to create a new short URL
-// display the email if logged in
 app.get("/urls/new", (req, res) => {
-  const user = getUserById(req.cookies["user_id"]);
+  const userId = req.cookies["user_id"];
 
-  if (!user) {
+  if (!userId) {
     return res.redirect("/login");
   }
 
   const templateVars = {
-    user,
+    userId,
+    users,
   };
-  res.render("urls_new", templateVars);
+
+  return res.render("urls_new", templateVars);
 });
 
 // ROUTES FOR /URLS/:ID
-// handle errors if id does not exist
 // display the specified short URL id and corresponding long URL
-// display the email if logged in
 app.get("/urls/:id", (req, res) => {
-  const idExists = urlDatabase.hasOwnProperty(req.params.id);
-  if (!idExists) {
-    return res.status(404).send("ID not found.");
+  const urlId = req.params.id;
+  const userId = req.cookies["user_id"];
+  
+  if (!userId) {
+    return res.status(401).send("Please log in.");
+  }
+
+  if (!urlDatabase[urlId]) {
+    return res.status(404).send("URL not found.");
   }
   
-  const user = getUserById(req.cookies["user_id"]);
-  if (!user) {
-    return res.status(401).send("Log in or register to see your URLs.")
-  }
-  
-  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
-  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
-  if (!idBelongsToUser) {
-    return res.status(403).send("You do not own this URL.");
+  if (userId !== urlDatabase[urlId].userID) {
+    return res.status(403).send("You do not have authorization to view this.");
   }
 
   const templateVars = {
-    user,
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
+    userId,
+    users,
+    urlId,
+    longURL: urlDatabase[urlId].longURL,
   };
-  res.render("urls_show", templateVars);
+
+  return res.render("urls_show", templateVars);
 });
 
 // receive input from form in urls_show.ejs
 // edit the long URL in the specified record in the urls database
 // redirect to /urls
 app.post("/urls/:id", (req, res) => {
-  const idExists = urlDatabase.hasOwnProperty(req.params.id);
-  if (!idExists) {
-    return res.status(404).send("ID not found.");
+  const urlId = req.params.id;
+  const userId = req.cookies["user_id"];
+
+  if (!userId) {
+    return res.status(401).send("Please log in.");
   }
 
-  if (!req.cookies["user_id"]) {
-    return res.status(401).send("Log in or register to edit your URLs.")
+  if (!urlDatabase[urlId]) {
+    return res.status(404).send("URL not found.");
   }
 
-  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
-  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
-  if (!idBelongsToUser) {
-    return res.status(403).send("You do not own this URL.");
+  if (userId !== urlDatabase[urlId].userID) {
+    return res.status(403).send("You do not have authorization to edit this.");
   }
   
-  urlDatabase[req.params.id].longURL = req.body.longURL;
-  res.redirect("/urls");
+  urlDatabase[urlId].longURL = req.body.longURL;
+  return res.redirect("/urls");
 });
 
 // ROUTES FOR /URLS/:ID/DELETE
 // delete the specified record from the urls database
 // redirect to /urls
 app.post("/urls/:id/delete", (req, res) => {
-  const idExists = urlDatabase.hasOwnProperty(req.params.id);
-  if (!idExists) {
-    return res.status(404).send("ID not found.");
+  const urlId = req.params.id;
+  const userId = req.cookies["user_id"];
+
+  if (!userId) {
+    return res.status(401).send("Please log in.");
   }
 
-  if (!req.cookies["user_id"]) {
-    return res.status(401).send("Log in or register to delete your URLs.");
+  if (!urlDatabase[urlId]) {
+    return res.status(404).send("URL not found.");
   }
 
-  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
-  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
-  if (!idBelongsToUser) {
-    return res.status(403).send("You do not own this URL.");
+  if (userId !== urlDatabase[urlId].userID) {
+    return res.status(403).send("You do not have authorization to delete this.");
   }
   
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  delete urlDatabase[urlId];
+  return res.redirect("/urls");
 });
 
 // ROUTES FOR /U/:ID
 // redirect to the long URL
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id].longURL;
-  res.redirect(longURL);
+  const urlId = req.params.id;
+  const longURL = urlDatabase[urlId].longURL;
+  
+  return res.redirect(longURL);
 });
 
 // ROUTES FOR /LOGIN
 // display the form to login a user
-// display the email if logged in
 app.get("/login", (req, res) => {
-  const user = getUserById(req.cookies["user_id"]);
+  const userId = req.cookies["user_id"];
 
-  if (user) {
+  if (userId) {
     return res.redirect("/urls");
   }
 
   const templateVars = {
-    user,
+    userId,
+    users,
   };
-  res.render("login", templateVars);
+
+  return res.render("login", templateVars);
 });
 
 // receive input from form in login.ejs
-// handle errors if email and/or password are invalid
 // set cookie for user_id
 // redirect to /urls
 app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
+  const user = getUserByEmail(email);
 
-  if (!getUserByEmail(email)) {
-    return res.status(403).send("Invalid email.");
+  if (!user || user.password !== password) {
+    return res.status(403).send("Invalid login details.");
   }
 
-  const validUser = getUserByEmail(email);
-
-  if (validUser.password !== password) {
-    return res.status(403).send("Invalid password.");
-  }
-
-  res.cookie("user_id", validUser.id);
-  res.redirect("/urls");
+  res.cookie("user_id", user.id);
+  return res.redirect("/urls");
 });
 
 // ROUTES FOR /LOGOUT
@@ -258,50 +250,48 @@ app.post("/login", (req, res) => {
 // redirect to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/login");
+  return res.redirect("/login");
 });
 
 // ROUTES FOR /REGISTER
 // display the form to register a new user
-// display the email if logged in
 app.get("/register", (req, res) => {
-  const user = getUserById(req.cookies["user_id"]);
+  const userId = req.cookies["user_id"];
 
-  if (user) {
+  if (userId) {
     return res.redirect("/urls");
   }
 
   const templateVars = {
-    user,
+    userId,
+    users,
   };
-  res.render("register", templateVars);
+
+  return res.render("register", templateVars);
 });
 
 // receive input from form in register.ejs
-// handle errors if email and/or password are invalid
 // generate a user id and create a record in the users database
 // set cookie for user_id
 // redirect to /urls
 app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
+  const user = getUserByEmail(email);
 
-  if (!email || !password) {
-    return res.status(400).send("Email and/or password not provided.");
-  }
-
-  if (getUserByEmail(email)) {
-    return res.status(400).send("Email already registered.");
+  if (user || !email || !password) {
+    return res.status(400).send("Invalid registration details.");
   }
 
   const id = generateRandomString();
+
   users[id] = {
     id,
     email,
     password,
   };
+
   res.cookie("user_id", id);
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // listen on port 8080
