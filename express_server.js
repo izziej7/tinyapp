@@ -166,6 +166,21 @@ app.get("/urls/:id", (req, res) => {
 // edit the long URL in the specified record in the urls database
 // redirect to /urls
 app.post("/urls/:id", (req, res) => {
+  const idExists = urlDatabase.hasOwnProperty(req.params.id);
+  if (!idExists) {
+    return res.status(404).send("ID not found.");
+  }
+
+  if (!req.cookies["user_id"]) {
+    return res.status(401).send("Log in or register to edit your URLs.")
+  }
+
+  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
+  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
+  if (!idBelongsToUser) {
+    return res.status(403).send("You do not own this URL.");
+  }
+  
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
@@ -174,6 +189,21 @@ app.post("/urls/:id", (req, res) => {
 // delete the specified record from the urls database
 // redirect to /urls
 app.post("/urls/:id/delete", (req, res) => {
+  const idExists = urlDatabase.hasOwnProperty(req.params.id);
+  if (!idExists) {
+    return res.status(404).send("ID not found.");
+  }
+
+  if (!req.cookies["user_id"]) {
+    return res.status(401).send("Log in or register to delete your URLs.");
+  }
+
+  const urlDatabaseById = urlsForUser(req.cookies["user_id"]);
+  const idBelongsToUser = urlDatabaseById.hasOwnProperty(req.params.id);
+  if (!idBelongsToUser) {
+    return res.status(403).send("You do not own this URL.");
+  }
+  
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
