@@ -1,6 +1,8 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const { generateRandomString, getUserByEmail, urlsForUser } = require("./helpers");
+
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -13,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // set up cookie session
 app.use(cookieSession({
   name: "session",
-  keys: ['key1', 'key2'],
+  keys: ["key1", "key2"],
 }));
 
 // DATABASE
@@ -43,42 +45,6 @@ const users = {
   },
 };
 
-// FUNCTIONS
-// generate a random short URL id or user id
-function generateRandomString() {
-  let randomString = '';
-
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-
-  return randomString;
-}
-
-// return the user if found or null if not based on the specified email
-function getUserByEmail(email) {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    }
-  }
-  return null;
-}
-
-// return the URLs associated with the specified userID as an object
-function urlsForUser(userId) {
-  const urlDatabaseById = {};
-  
-  for (const urlId in urlDatabase) {
-    if (urlDatabase[urlId].userID === userId) {
-      urlDatabaseById[urlId] = urlDatabase[urlId];
-    }
-  }
-
-  return urlDatabaseById;
-}
-
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
 app.get("/urls", (req, res) => {
@@ -91,7 +57,7 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     userId,
     users,
-    urls: urlsForUser(userId),
+    urls: urlsForUser(userId, urlDatabase),
   };
 
   return res.render("urls_index", templateVars);
@@ -239,7 +205,7 @@ app.get("/login", (req, res) => {
 // redirect to /urls
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid login details.");
@@ -280,7 +246,7 @@ app.get("/register", (req, res) => {
 // redirect to /urls
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (user || !email || !password) {
     return res.status(400).send("Invalid registration details.");
