@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -10,11 +10,14 @@ app.set("view engine", "ejs");
 // set up body parser
 app.use(express.urlencoded({ extended: true }));
 
-// set up cookie parser
-app.use(cookieParser());
+// set up cookie session
+app.use(cookieSession({
+  name: "session",
+  keys: ['key1', 'key2'],
+}));
 
 // DATABASE
-// set up url object
+// set up urls object
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -26,7 +29,7 @@ const urlDatabase = {
   },
 };
 
-// set up user object
+// set up users object
 const users = {
   "c3yWo3": {
     id: "c3yWo3",
@@ -79,7 +82,7 @@ function urlsForUser(userId) {
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   if (!userId) {
     return res.status(401).send("Please log in.")
@@ -98,7 +101,7 @@ app.get("/urls", (req, res) => {
 // generate a short URL id and create a record in the urls database
 // redirect to /urls/:id
 app.post("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -117,7 +120,7 @@ app.post("/urls", (req, res) => {
 // ROUTES FOR /URLS/NEW
 // display the form to create a new short URL
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
 
   if (!userId) {
     return res.redirect("/login");
@@ -135,7 +138,7 @@ app.get("/urls/new", (req, res) => {
 // display the specified short URL id and corresponding long URL
 app.get("/urls/:id", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -164,7 +167,7 @@ app.get("/urls/:id", (req, res) => {
 // redirect to /urls
 app.post("/urls/:id", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
 
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -187,7 +190,7 @@ app.post("/urls/:id", (req, res) => {
 // redirect to /urls
 app.post("/urls/:id/delete", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
 
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -217,7 +220,7 @@ app.get("/u/:id", (req, res) => {
 // ROUTES FOR /LOGIN
 // display the form to login a user
 app.get("/login", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
 
   if (userId) {
     return res.redirect("/urls");
@@ -232,7 +235,7 @@ app.get("/login", (req, res) => {
 });
 
 // receive input from form in login.ejs
-// set cookie for user_id
+// set cookie session for user_id
 // redirect to /urls
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
@@ -242,23 +245,22 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid login details.");
   }
 
-  console.log(users);
-  res.cookie("user_id", user.id);
+  req.session.user_id = user.id;
   return res.redirect("/urls");
 });
 
 // ROUTES FOR /LOGOUT
-// clear cookie for user_id
+// clear cookie session
 // redirect to /urls
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   return res.redirect("/login");
 });
 
 // ROUTES FOR /REGISTER
 // display the form to register a new user
 app.get("/register", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
 
   if (userId) {
     return res.redirect("/urls");
@@ -274,7 +276,7 @@ app.get("/register", (req, res) => {
 
 // receive input from form in register.ejs
 // generate a user id and create a record in the users database
-// set cookie for user_id
+// set cookie session for user_id
 // redirect to /urls
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
@@ -292,8 +294,7 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(password, 10),
   };
 
-  console.log(users);
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   return res.redirect("/urls");
 });
 
