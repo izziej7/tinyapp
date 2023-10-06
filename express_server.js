@@ -193,6 +193,11 @@ app.delete("/urls/:id/delete", (req, res) => {
 // redirect to the long URL
 app.get("/u/:id", (req, res) => {
   const urlId = req.params.id;
+
+  if (!urlDatabase[urlId]) {
+    return res.status(404).send("URL not found.");
+  } 
+
   const longURL = urlDatabase[urlId].longURL;
   
   return res.redirect(longURL);
