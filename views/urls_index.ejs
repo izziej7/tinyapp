@@ -51,7 +51,7 @@
               <!--deletes short url record from database-->
               <!--redirects to /urls-->
               <td>
-                <form method="POST" action="/urls/<%= id %>/delete">
+                <form method="POST" action="/urls/<%= id %>/delete?_method=DELETE">
                   <button type="submit" class="btn btn-outline-danger">Delete</button>
                 </form>
               </td>

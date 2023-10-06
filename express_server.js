@@ -1,10 +1,14 @@
 const express = require("express");
+const methodOverride = require("method-override");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const { generateRandomString, getUserByEmail, urlsForUser } = require("./helpers");
 
 const app = express();
 const PORT = 8080; // default port 8080
+
+// MIDDLEWARE
+app.use(methodOverride("_method"));
 
 // set ejs as the template engine
 app.set("view engine", "ejs");
@@ -44,6 +48,17 @@ const users = {
     password: bcrypt.hashSync("456", 10),
   },
 };
+
+// ROUTES FOR /
+app.get("/", (req, res) => {
+  const userId = req.session.user_id;
+
+  if (!userId) {
+    return res.redirect("/login");
+  }
+
+  return res.redirect("/urls");
+});
 
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
@@ -131,7 +146,7 @@ app.get("/urls/:id", (req, res) => {
 // receive input from form in urls_show.ejs
 // edit the long URL in the specified record in the urls database
 // redirect to /urls
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const urlId = req.params.id;
   const userId = req.session.user_id;
 
@@ -154,7 +169,7 @@ app.post("/urls/:id", (req, res) => {
 // ROUTES FOR /URLS/:ID/DELETE
 // delete the specified record from the urls database
 // redirect to /urls
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   const urlId = req.params.id;
   const userId = req.session.user_id;
 

@@ -29,7 +29,7 @@
       <!--set up form to post the edited long URL to /urls/:id-->
       <div class="card-footer text-muted">
         <h2>Edit</h2>
-        <form class="form-inline" method="POST" action="/urls/<%= urlId %>">
+        <form class="form-inline" method="POST" action="/urls/<%= urlId %>?_method=PUT">
           <div class="form-group mb-2 mx-auto">
             <label for="longURL">New URL:</label>
             <input
