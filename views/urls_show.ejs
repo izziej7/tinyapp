@@ -19,12 +19,15 @@
       <div class="card-header"></div>
       <!--display specified short URL id and corresponding long URL-->
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for: <%= url.longURL %></h5>
         <!--set up short URL id to navigate to the short URL-->
         <!--the short URL redirects to the long URL-->
         <p class="card-text">
           Short URL ID: <a href="/u/<%= urlId %>"><%= urlId %></a>
         </p>
+        <p class="card-text">Creation Date: <%= url.dateCreated.toDateString() %></p>
+        <p class="card-text">Total Visits: <%= url.totalVisits %></p>
+        <p class="card-text">Unique Visits: <%= url.uniqueVisits %></p>
       </div>
       <!--set up form to post the edited long URL to /urls/:id-->
       <div class="card-footer text-muted">

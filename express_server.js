@@ -28,10 +28,16 @@ const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
     userID: "c3yWo3",
+    dateCreated: new Date(2023, 9, 5),
+    totalVisits: 0,
+    uniqueVisits: 0,
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
     userID: "1tn6yL",
+    dateCreated: new Date(2023, 9, 5),
+    totalVisits: 0,
+    uniqueVisits: 0,
   },
 };
 
@@ -70,8 +76,7 @@ app.get("/urls", (req, res) => {
   }
 
   const templateVars = {
-    userId,
-    users,
+    user: users[userId],
     urls: urlsForUser(userId, urlDatabase),
   };
 
@@ -93,6 +98,9 @@ app.post("/urls", (req, res) => {
   urlDatabase[urlId] = {
     longURL: req.body.longURL,
     userID: userId,
+    dateCreated: new Date(),
+    totalVisits: 0,
+    uniqueVisits: 0,
   };
 
   return res.redirect(`/urls/${urlId}`);
@@ -108,8 +116,7 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = {
-    userId,
-    users,
+    user: users[userId],
   };
 
   return res.render("urls_new", templateVars);
@@ -134,10 +141,9 @@ app.get("/urls/:id", (req, res) => {
   }
 
   const templateVars = {
-    userId,
-    users,
+    user: users[userId],
     urlId,
-    longURL: urlDatabase[urlId].longURL,
+    url: urlDatabase[urlId],
   };
 
   return res.render("urls_show", templateVars);
@@ -198,8 +204,14 @@ app.get("/u/:id", (req, res) => {
     return res.status(404).send("URL not found.");
   } 
 
+  urlDatabase[urlId].totalVisits += 1;
+
+  if (!req.session[`unique_visitor_${urlId}`]) {
+    req.session[`unique_visitor_${urlId}`] = generateRandomString();
+    urlDatabase[urlId].uniqueVisits += 1;
+  }
+
   const longURL = urlDatabase[urlId].longURL;
-  
   return res.redirect(longURL);
 });
 
@@ -213,8 +225,7 @@ app.get("/login", (req, res) => {
   }
 
   const templateVars = {
-    userId,
-    users,
+    user: users[userId],
   };
 
   return res.render("login", templateVars);
@@ -239,7 +250,7 @@ app.post("/login", (req, res) => {
 // clear cookie session
 // redirect to /urls
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session.user_id = null;
   return res.redirect("/login");
 });
 
@@ -253,8 +264,7 @@ app.get("/register", (req, res) => {
   }
 
   const templateVars = {
-    userId,
-    users,
+    user: users[userId],
   };
 
   return res.render("register", templateVars);
