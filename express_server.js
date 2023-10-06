@@ -28,14 +28,14 @@ const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
     userID: "c3yWo3",
-    dateCreated: new Date(2023, 9, 5),
+    dateCreated: new Date(2023, 9, 5).toDateString(),
     totalVisits: 0,
     uniqueVisits: 0,
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
     userID: "1tn6yL",
-    dateCreated: new Date(2023, 9, 5),
+    dateCreated: new Date(2023, 9, 5).toDateString(),
     totalVisits: 0,
     uniqueVisits: 0,
   },
@@ -98,7 +98,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[urlId] = {
     longURL: req.body.longURL,
     userID: userId,
-    dateCreated: new Date(),
+    dateCreated: new Date().toDateString(),
     totalVisits: 0,
     uniqueVisits: 0,
   };
