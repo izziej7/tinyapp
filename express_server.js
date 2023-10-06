@@ -196,6 +196,7 @@ app.delete("/urls/:id/delete", (req, res) => {
 });
 
 // ROUTES FOR /U/:ID
+// update totalVisits and uniqueVisits
 // redirect to the long URL
 app.get("/u/:id", (req, res) => {
   const urlId = req.params.id;

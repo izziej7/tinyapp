@@ -43,11 +43,12 @@
               <td><%= id %></td>
               <!--display long URL-->
               <td><%= urls[id].longURL %></td>
-              <!--edit button navigates to /urls/:id-->
-              <!--/urls/:id has an edit form-->
+              <!--display creation date, total visits, and unique visits-->
               <td><%= urls[id].dateCreated %></td>
               <td><%= urls[id].totalVisits %></td>
               <td><%= urls[id].uniqueVisits %></td>
+              <!--edit button navigates to /urls/:id-->
+              <!--/urls/:id has an edit form-->
               <td>
                 <form method="GET" action="/urls/<%= id %>">
                   <button type="submit" class="btn btn-outline-primary">Edit</button>
