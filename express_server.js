@@ -57,7 +57,7 @@ const users = {
 
 // ROUTES FOR /
 app.get("/", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.redirect("/login");
@@ -69,10 +69,10 @@ app.get("/", (req, res) => {
 // ROUTES FOR /URLS
 // display all the URLs in the urls database
 app.get("/urls", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   
   if (!userId) {
-    return res.status(401).send("Please log in.")
+    return res.status(401).send("Please log in.");
   }
 
   const templateVars = {
@@ -87,7 +87,7 @@ app.get("/urls", (req, res) => {
 // generate a short URL id and create a record in the urls database
 // redirect to /urls/:id
 app.post("/urls", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -109,7 +109,7 @@ app.post("/urls", (req, res) => {
 // ROUTES FOR /URLS/NEW
 // display the form to create a new short URL
 app.get("/urls/new", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.redirect("/login");
@@ -126,7 +126,7 @@ app.get("/urls/new", (req, res) => {
 // display the specified short URL id and corresponding long URL
 app.get("/urls/:id", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -154,7 +154,7 @@ app.get("/urls/:id", (req, res) => {
 // redirect to /urls
 app.put("/urls/:id", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -177,7 +177,7 @@ app.put("/urls/:id", (req, res) => {
 // redirect to /urls
 app.delete("/urls/:id/delete", (req, res) => {
   const urlId = req.params.id;
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.status(401).send("Please log in.");
@@ -203,7 +203,7 @@ app.get("/u/:id", (req, res) => {
 
   if (!urlDatabase[urlId]) {
     return res.status(404).send("URL not found.");
-  } 
+  }
 
   urlDatabase[urlId].totalVisits += 1;
 
@@ -219,7 +219,7 @@ app.get("/u/:id", (req, res) => {
 // ROUTES FOR /LOGIN
 // display the form to login a user
 app.get("/login", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (userId) {
     return res.redirect("/urls");
@@ -233,7 +233,7 @@ app.get("/login", (req, res) => {
 });
 
 // receive input from form in login.ejs
-// set cookie session for user_id
+// set cookie session for userId
 // redirect to /urls
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
@@ -243,7 +243,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid login details.");
   }
 
-  req.session.user_id = user.id;
+  req.session.userId = user.id;
   return res.redirect("/urls");
 });
 
@@ -251,14 +251,14 @@ app.post("/login", (req, res) => {
 // clear cookie session
 // redirect to /urls
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;
+  req.session.userId = null;
   return res.redirect("/login");
 });
 
 // ROUTES FOR /REGISTER
 // display the form to register a new user
 app.get("/register", (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (userId) {
     return res.redirect("/urls");
@@ -273,7 +273,7 @@ app.get("/register", (req, res) => {
 
 // receive input from form in register.ejs
 // generate a user id and create a record in the users database
-// set cookie session for user_id
+// set cookie session for userId
 // redirect to /urls
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
@@ -291,7 +291,7 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(password, 10),
   };
 
-  req.session.user_id = id;
+  req.session.userId = id;
   return res.redirect("/urls");
 });
 

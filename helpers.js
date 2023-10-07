@@ -1,5 +1,5 @@
 // generate a random short URL id or user id
-function generateRandomString() {
+const generateRandomString = () => {
   let randomString = '';
 
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -8,20 +8,20 @@ function generateRandomString() {
   }
 
   return randomString;
-}
+};
 
 // return the user if found or null if not based on the specified email
-function getUserByEmail(email, users) {
+const getUserByEmail = (email, users) => {
   for (const userId in users) {
     if (users[userId].email === email) {
       return users[userId];
     }
   }
   return null;
-}
+};
 
 // return the URLs associated with the specified userID as an object
-function urlsForUser(userId, urlDatabase) {
+const urlsForUser = (userId, urlDatabase) => {
   const urlDatabaseById = {};
 
   for (const urlId in urlDatabase) {
@@ -31,6 +31,6 @@ function urlsForUser(userId, urlDatabase) {
   }
 
   return urlDatabaseById;
-}
+};
 
 module.exports = { generateRandomString, getUserByEmail, urlsForUser };
